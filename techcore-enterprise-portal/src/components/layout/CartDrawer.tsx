@@ -1,6 +1,9 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import type { CartItem } from '../../store/cart';
 import { useCartStore } from '../../store/cart';
+import { useToast } from '../../components/ToastProvider';
+import { parseBOMCSVWithQty } from '../../utils/bomParser';
+import { PRODUCTS } from '../../store/catalog';
 
 interface CartDrawerProps {
   open: boolean;
@@ -9,8 +12,52 @@ interface CartDrawerProps {
 }
 
 export default function CartDrawer({ open, onClose, onSubmit }: CartDrawerProps) {
-  const { items, removeItem, updateQty, totalItems, totalPrice, clearCart } = useCartStore();
-  const drawerRef = useRef<HTMLDivElement>(null);
+  const { items, addItem, removeItem, updateQty, totalItems, totalPrice, clearCart } = useCartStore();
+  const { addToast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [bomErrors, setBomErrors] = useState<string[]>([]);
+  const [notFoundSkus, setNotFoundSkus] = useState<string[]>([]);
+  const [lastImportCount, setLastImportCount] = useState<number | null>(null);
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const { added, notFound, errors } = parseBOMCSVWithQty(text);
+
+      // Bulk-add to cart
+      added.forEach(({ sku, qty }) => {
+        const product = PRODUCTS.find((p) => p.sku === sku);
+        if (product) {
+          addItem({
+            sku: product.sku,
+            name: product.name,
+            vendor: product.vendor,
+            price: product.price,
+            stockStatus: product.stockStatus,
+            qty,
+          });
+        }
+      });
+
+      setNotFoundSkus(notFound);
+      setBomErrors(errors);
+      setLastImportCount(added.length);
+
+      if (added.length > 0) {
+        addToast(`Added ${added.length} items from BOM import`, 'success');
+      }
+      if (notFound.length > 0) {
+        addToast(`${notFound.length} SKU(s) not found in catalog`, 'error');
+      }
+    };
+    reader.readAsText(file);
+    // Reset input so the same file can be re-imported
+    e.target.value = '';
+  }, [addItem, addToast]);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -26,9 +73,7 @@ export default function CartDrawer({ open, onClose, onSubmit }: CartDrawerProps)
     } else {
       document.body.style.overflow = '';
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    return () => { document.body.style.overflow = ''; };
   }, [open]);
 
   if (!open) return null;
@@ -40,7 +85,6 @@ export default function CartDrawer({ open, onClose, onSubmit }: CartDrawerProps)
         onClick={onClose}
       />
       <div
-        ref={drawerRef}
         className="fixed right-0 top-0 h-full w-full max-w-md bg-bg-base border-l border-border z-50 flex flex-col shadow-2xl"
         role="dialog"
         aria-label="RFQ Cart"
@@ -64,22 +108,60 @@ export default function CartDrawer({ open, onClose, onSubmit }: CartDrawerProps)
           </button>
         </div>
 
+        {/* BOM Import Bar */}
+        <div className="px-6 py-3 border-b border-border bg-surface/50">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border text-xs font-mono text-text-secondary hover:text-accent hover:border-accent/40 transition-colors"
+              aria-label="Import BOM CSV file"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 15l6-6m0 0l6 6m-6-6V21a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01-.293 1.414L12 14.586V21" />
+              </svg>
+              Import BOM (CSV)
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleFileChange}
+              className="hidden"
+              aria-label="Upload BOM CSV file with SKU and Qty columns"
+            />
+            {lastImportCount !== null && (
+              <span className="text-xs font-mono text-success">
+                +{lastImportCount} items imported
+              </span>
+            )}
+          </div>
+          {(notFoundSkus.length > 0 || bomErrors.length > 0) && (
+            <div className="mt-2 text-xs text-danger font-mono">
+              {notFoundSkus.length > 0 && (
+                <p>Unknown SKUs: {notFoundSkus.join(', ')}</p>
+              )}
+              {bomErrors.map((err) => (
+                <p key={err}>{err}</p>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {items.length === 0 ? (
             <div className="text-center py-16">
               <svg className="w-12 h-12 text-text-muted/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
               <p className="text-sm text-text-muted">Your RFQ cart is empty</p>
-              <p className="text-xs text-text-muted/60 mt-1">Add products to start a quote request</p>
+              <p className="text-xs text-text-muted/60 mt-1">
+                Add products individually or import a BOM spreadsheet
+              </p>
             </div>
           ) : (
             items.map((item: CartItem) => (
-              <div
-                key={item.sku}
-                className="flex gap-4 p-4 rounded-lg bg-surface border border-border"
-              >
+              <div key={item.sku} className="flex gap-4 p-4 rounded-lg bg-surface border border-border">
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-mono text-text-muted mb-0.5">{item.sku}</p>
                   <p className="text-sm font-medium text-text-primary truncate">{item.name}</p>
@@ -146,7 +228,7 @@ export default function CartDrawer({ open, onClose, onSubmit }: CartDrawerProps)
               </button>
               <button
                 onClick={onSubmit}
-                className="flex-1 py-2.5 rounded-lg bg-accent text-bg-base text-sm font-semibold hover:shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all"
+                className="flex-1 py-2.5 rounded-lg bg-accent text-bg-base text-sm font-semibold hover:shadow-[0_0-20px_rgba(56,189,248,0.4)] transition-all"
               >
                 Submit RFQ
               </button>
