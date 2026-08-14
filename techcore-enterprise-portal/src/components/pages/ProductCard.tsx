@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Product } from '../../store/catalog';
 import { useCartStore } from '../../store/cart';
 import { useCompareStore } from '../../store/compare';
+import { useUpsellStore } from '../../store/upsell';
 import { useToast } from '../ToastProvider';
 import { Tag } from '../ui/Tag';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +14,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCartStore();
   const { toggle, isSelected } = useCompareStore();
+  const { showUpsell } = useUpsellStore();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
@@ -25,6 +27,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     setAdded(true);
     addToast(`${product.name} added to RFQ cart`, 'success');
     setTimeout(() => setAdded(false), 1500);
+    // Trigger upsell for rack servers
+    if (product.category === 'Servers & Compute') {
+      showUpsell(product.sku);
+    }
   };
 
   return (
