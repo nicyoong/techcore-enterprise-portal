@@ -1,0 +1,10 @@
+fix: resolve Vercel build error — tsconfig.json not found at project root
+
+- Add root tsconfig.json pointing to techcore-enterprise-portal/src
+  so Vercel's build runner (which executes from repo root) can find
+  TypeScript configuration without the TS5083 error
+- Update vercel.json to cd into techcore-enterprise-portal before
+  running npm install and npm run build, with outputDirectory
+  pointing to techcore-enterprise-portal/dist
+- Root tsconfig uses bundler moduleResolution compatible with
+  Tailwind v4 + Vite 8

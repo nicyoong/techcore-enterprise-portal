@@ -1,8 +1,8 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "buildCommand": "cd techcore-enterprise-portal && npm install && npm run build",
+  "outputDirectory": "techcore-enterprise-portal/dist",
+  "devCommand": "cd techcore-enterprise-portal && npm run dev",
+  "installCommand": "cd techcore-enterprise-portal && npm install",
   "framework": "vite",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
