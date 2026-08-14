@@ -2,11 +2,14 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import App from '@/App';
 import { BrowserRouter } from 'react-router-dom';
+import { ToastProvider } from '@/components/ToastProvider';
 
 function RenderApp() {
   return (
     <BrowserRouter>
-      <App />
+      <ToastProvider>
+        <App />
+      </ToastProvider>
     </BrowserRouter>
   );
 }

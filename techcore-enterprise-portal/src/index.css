@@ -44,14 +44,65 @@ body {
   background: #374151;
 }
 
-/* Marquee animation */
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
 /* Selection color */
 ::selection {
   background: rgba(56, 189, 248, 0.3);
   color: #F1F5F9;
+}
+
+/* Focus visible for keyboard nav */
+:focus-visible {
+  outline: 2px solid #38BDF8;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Button press scale */
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1F2937 25%, #2a3545 50%, #1F2937 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Toast slide-in animation */
+@keyframes toast-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toast-out {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+.toast-enter {
+  animation: toast-in 0.25s ease-out forwards;
+}
+
+.toast-exit {
+  animation: toast-out 0.25s ease-in forwards;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton {
+    animation: none;
+    background: #1F2937;
+  }
 }

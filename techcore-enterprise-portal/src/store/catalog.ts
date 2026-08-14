@@ -42,8 +42,7 @@ export const PRODUCTS: Product[] = [
       GPU: 'Up to 4× PCIe 5.0 x16',
       FormFactor: '2U Rack',
     },
-    description:
-      'High-density 2U workhorse for virtualization, databases, and AI/ML inference. Supports up to 6th Gen Intel Xeon Scalable processors with 12TB DDR5.',
+    description: 'High-density 2U workhorse for virtualization, databases, and AI/ML inference. Supports up to 6th Gen Intel Xeon Scalable processors with 12TB DDR5.',
   },
   {
     sku: 'HPE-PL-DL380-002',
@@ -61,8 +60,7 @@ export const PRODUCTS: Product[] = [
       GPU: 'Up to 3× PCIe 5.0 add-in cards',
       FormFactor: '2U Rack',
     },
-    description:
-      'Industry-standard 2U server with HPE Intelligent Provisioning and iLO 7 management. Built for hybrid cloud and enterprise workloads.',
+    description: 'Industry-standard 2U server with HPE Intelligent Provisioning and iLO 7 management. Built for hybrid cloud and enterprise workloads.',
   },
   {
     sku: 'LENOVO-PS-T1700-003',
@@ -80,8 +78,7 @@ export const PRODUCTS: Product[] = [
       PSU: '700W 80+ Platinum',
       Warranty: '3-year depot with next-business-day',
     },
-    description:
-      'Professional workstation for CAD, BIM, and creative workloads. ISV-certified for Autodesk, Adobe, and Dassault Systèmes.',
+    description: 'Professional workstation for CAD, BIM, and creative workloads. ISV-certified for Autodesk, Adobe, and Dassault Systèmes.',
   },
   {
     sku: 'CISCO-C9300-004',
@@ -99,8 +96,7 @@ export const PRODUCTS: Product[] = [
       Security: 'MACsec, IP SLA, TrustSec',
       Stacking: 'Cisco StackPower or virtual stacking',
     },
-    description:
-      'Enterprise access-layer switch with Cisco IOS XE and digital trilateration security. Supports up to 740W PoE per chassis.',
+    description: 'Enterprise access-layer switch with Cisco IOS XE and digital trilateration security. Supports up to 740W PoE per chassis.',
   },
   {
     sku: 'ARISTA-7060-005',
@@ -118,8 +114,7 @@ export const PRODUCTS: Product[] = [
       OS: 'EOS (Extensible Operating System)',
       Height: '1U fixed-configuration',
     },
-    description:
-      'High-performance data center switch with low-latency EOS and automation-ready CLI. Ideal for spine-leaf and leaf-tier deployments.',
+    description: 'High-performance data center switch with low-latency EOS and automation-ready CLI. Ideal for spine-leaf and leaf-tier deployments.',
   },
   {
     sku: 'PURE-FA-X90-006',
@@ -137,8 +132,7 @@ export const PRODUCTS: Product[] = [
       Connectivity: '16× 32Gb FC + 16× 100GbE',
       Support: 'Pure1 managed, 24/7 proactive support',
     },
-    description:
-      'All-flash NAS/SAN hybrid array with active-active HA, inline dedupe/compression, and Pure1 observability. 5-year warranty standard.',
+    description: 'All-flash NAS/SAN hybrid array with active-active HA, inline dedupe/compression, and Pure1 observability. 5-year warranty standard.',
   },
   {
     sku: 'PALO-PA5280-007',
@@ -156,8 +150,7 @@ export const PRODUCTS: Product[] = [
       Slots: '4× expansion slots',
       Power: 'Dual hot-swappable redundant PSUs',
     },
-    description:
-      'Mid-range next-gen firewall with AI-driven threat intelligence, Prisma SD-WAN integration, and DNA analysis for automated incident response.',
+    description: 'Mid-range next-gen firewall with AI-driven threat intelligence, Prisma SD-WAN integration, and DNA analysis for automated incident response.',
   },
   {
     sku: 'FORTI-FG200F-008',
@@ -175,8 +168,7 @@ export const PRODUCTS: Product[] = [
       Slots: '2× SFP+ 10Gb + 4× GE management',
       VPNConcurrent: 'Up to 2,000 IPsec peers',
     },
-    description:
-      'Cost-effective next-gen firewall with AI-accelerated threat detection, SD-WAN built-in, and single-pane-of-glass FortiManager integration.',
+    description: 'Cost-effective next-gen firewall with AI-accelerated threat detection, SD-WAN built-in, and single-pane-of-glass FortiManager integration.',
   },
   {
     sku: 'CISCO-C9400-009',
@@ -194,8 +186,7 @@ export const PRODUCTS: Product[] = [
       Cooling: 'Dual redundant smart fans',
       StackMode: 'Cisco StackWise Virtual (up to 32 Tbps)',
     },
-    description:
-      'Modular core/distribution switch with sup flexibility and ScaleX silicon. Supports FabricPath, VXLAN, and Cisco Application Centric Infrastructure.',
+    description: 'Modular core/distribution switch with sup flexibility and ScaleX silicon. Supports FabricPath, VXLAN, and Cisco Application Centric Infrastructure.',
   },
   {
     sku: 'DELL-R660-010',
@@ -213,8 +204,7 @@ export const PRODUCTS: Product[] = [
       GPU: 'Up to 1× full-height dual-slot PCIe 5.0',
       Management: 'iDRAC9 with Lifecycle Controller',
     },
-    description:
-      'Compact 1U compute node for edge, VDI, and lightweight virtualization. iDRAC9 Enterprise with remote console and PowerShell support.',
+    description: 'Compact 1U compute node for edge, VDI, and lightweight virtualization. iDRAC9 Enterprise with remote console and PowerShell support.',
   },
   {
     sku: 'LENOVO-X1C11-011',
@@ -232,8 +222,7 @@ export const PRODUCTS: Product[] = [
       Battery: '88Wh, up to 18hr runtime',
       Weight: '1.12 kg / 2.47 lbs',
     },
-    description:
-      'Ultra-lightweight business ultrabook with AI NPU, Thunderbolt 4, and military-grade durability (MIL-STD-810H). Windows Hello IR camera standard.',
+    description: 'Ultra-lightweight business ultrabook with AI NPU, Thunderbolt 4, and military-grade durability (MIL-STD-810H). Windows Hello IR camera standard.',
   },
   {
     sku: 'UBNT-UDM-PRO-012',
@@ -251,8 +240,7 @@ export const PRODUCTS: Product[] = [
       NVR: '2× 3.5" SATA, up to 16TB storage',
       CameraSlots: 'Supports up to 32 UniFi cameras',
     },
-    description:
-      'All-in-one networking appliance combining UniFi gateway, switch, WiFi controller, and NVR. Ideal for SMBs and branch offices.',
+    description: 'All-in-one networking appliance combining UniFi gateway, switch, WiFi controller, and NVR. Ideal for SMBs and branch offices.',
   },
 ];
 
@@ -266,18 +254,9 @@ export const CATEGORIES = [
 ] as const;
 
 export const VENDORS = [
-  'Cisco',
-  'Dell',
-  'HPE',
-  'Lenovo',
-  'Pure Storage',
-  'Palo Alto Networks',
-  'Fortinet',
-  'Arista',
-  'Ubiquiti',
-  'Juniper',
-  'Netapp',
-  'Nutanix',
+  'Cisco', 'Dell', 'HPE', 'Lenovo', 'Pure Storage',
+  'Palo Alto Networks', 'Fortinet', 'Arista', 'Ubiquiti',
+  'Juniper', 'Netapp', 'Nutanix',
 ] as const;
 
 export const useCatalogStore = create<CatalogState>((set, get) => ({
@@ -308,7 +287,6 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
     result = [...result].sort((a, b) => {
       if (sortBy === 'price-asc') return a.price - b.price;
       if (sortBy === 'price-desc') return b.price - a.price;
-      // availability: ok first, then low, then out
       const order = { ok: 0, low: 1, out: 2 };
       return order[a.stockStatus] - order[b.stockStatus];
     });

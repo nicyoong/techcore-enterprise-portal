@@ -24,7 +24,7 @@ export const useCompareStore = create<CompareState>((set, get) => ({
     if (exists) {
       set({ selected: selected.filter((s) => s.sku !== item.sku) });
     } else {
-      if (selected.length >= 4) return; // max 4
+      if (selected.length >= 4) return;
       set({ selected: [...selected, item] });
     }
   },
