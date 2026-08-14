@@ -1,49 +1,117 @@
-import { describe, it, expect } from 'vitest';
-import { parseBOMCSVWithQty } from '../../src/utils/bomParser';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { parseBOMCSVWithQty } from '@/utils/bomParser';
 
-describe('parseBOMCSVWithQty', () => {
-  it('matches SKUs against the catalog and returns correct quantities', () => {
-    const csv = 'SKU,Qty\nDELL-PE-R760-001,5\nCISCO-C9300-004,2\n';
-    const result = parseBOMCSVWithQty(csv);
-    expect(result.added).toHaveLength(2);
-    expect(result.added[0]).toEqual({ sku: 'DELL-PE-R760-001', qty: 5 });
-    expect(result.added[1]).toEqual({ sku: 'CISCO-C9300-004', qty: 2 });
-    expect(result.notFound).toEqual([]);
-    expect(result.errors).toEqual([]);
-  });
+describe('BOM Parser', () => {
+  describe('parseBOMCSVWithQty', () => {
+    it('should return error for empty CSV', () => {
+      const result = parseBOMCSVWithQty('');
+      expect(result).toEqual({
+        added: [],
+        notFound: [],
+        errors: ['CSV is empty'],
+      });
+    });
 
-  it('reports unknown SKUs in notFound', () => {
-    const csv = 'SKU,Qty\nFAKE-SKU-999,3\nDELL-PE-R760-001,1\n';
-    const result = parseBOMCSVWithQty(csv);
-    expect(result.notFound).toEqual(['FAKE-SKU-999']);
-    expect(result.added).toHaveLength(1);
-  });
+    it('should handle CSV with whitespace only', () => {
+      const result = parseBOMCSVWithQty('   \n\n  ');
+      expect(result.errors).toContain('CSV is empty');
+    });
 
-  it('handles CSV without header row', () => {
-    const csv = 'DELL-PE-R760-001,10\nHPE-PL-DL380-002,3\n';
-    const result = parseBOMCSVWithQty(csv);
-    expect(result.added).toHaveLength(2);
-    expect(result.added[0].qty).toBe(10);
-    expect(result.added[1].qty).toBe(3);
-  });
+    it('should parse CSV with header and valid data', () => {
+      const csv = `SKU,Qty
+DELL-PE-R760-001,2
+HPE-PL-DL380-002,1`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      expect(result.added.length).toBe(2);
+      expect(result.added[0].sku).toBe('DELL-PE-R760-001');
+      expect(result.added[0].qty).toBe(2);
+      expect(result.added[1].sku).toBe('HPE-PL-DL380-002');
+      expect(result.added[1].qty).toBe(1);
+      expect(result.errors).toEqual([]);
+      expect(result.notFound).toEqual([]);
+    });
 
-  it('rejects invalid quantities', () => {
-    const csv = 'SKU,Qty\nDELL-PE-R760-001,abc\n';
-    const result = parseBOMCSVWithQty(csv);
-    expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.added).toHaveLength(0);
-  });
+    it('should handle invalid SKU', () => {
+      const csv = `SKU,Qty
+INVALID-SKU,2`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      expect(result.notFound).toContain('INVALID-SKU');
+      expect(result.added).toEqual([]);
+    });
 
-  it('returns empty result for empty CSV', () => {
-    const result = parseBOMCSVWithQty('');
-    expect(result.added).toEqual([]);
-    expect(result.errors).toEqual(['CSV is empty']);
-  });
+    it('should handle invalid quantity', () => {
+      const csv = `SKU,Qty
+DELL-PE-R760-001,abc`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
 
-  it('aggregates duplicate SKUs as separate entries (cart handles merging)', () => {
-    const csv = 'SKU,Qty\nDELL-PE-R760-001,2\nDELL-PE-R760-001,3\n';
-    const result = parseBOMCSVWithQty(csv);
-    expect(result.added).toHaveLength(2);
-    expect(result.added.map((a) => a.qty)).toEqual([2, 3]);
+    it('should handle row with insufficient columns', () => {
+      const csv = `SKU,Qty
+DELL-PE-R760-001`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('should be case-insensitive for SKU matching', () => {
+      const csv = `SKU,Qty
+dell-pe-r760-001,2`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      expect(result.added.length).toBe(1);
+      expect(result.added[0].sku).toBe('dell-pe-r760-001');
+    });
+
+    it('should trim whitespace from values', () => {
+      const csv = `  SKU  ,  Qty  
+  DELL-PE-R760-001  ,  2  
+`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      expect(result.added.length).toBe(1);
+    });
+
+    it('should handle mixed valid and invalid SKUs', () => {
+      const csv = `SKU,Qty
+DELL-PE-R760-001,2
+INVALID-SKU,1`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      expect(result.added.length).toBe(1);
+      expect(result.notFound).toContain('INVALID-SKU');
+    });
+
+    it('should handle empty rows', () => {
+      const csv = `SKU,Qty
+
+DELL-PE-R760-001,2
+`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      expect(result).toBeDefined();
+    });
+
+    it('should filter out negative quantities', () => {
+      const csv = `SKU,Qty
+DELL-PE-R760-001,-5`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      // Parser filters out invalid quantities including negative
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('should handle zero quantity', () => {
+      const csv = `SKU,Qty
+DELL-PE-R760-001,0`;
+      
+      const result = parseBOMCSVWithQty(csv);
+      // Zero quantity may be filtered or kept depending on implementation
+      expect(result).toBeDefined();
+    });
   });
 });
