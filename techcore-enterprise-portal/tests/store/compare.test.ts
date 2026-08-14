@@ -83,4 +83,54 @@ describe('Compare Store', () => {
     expect(store.isSelected('DELL-PE-R760-001')).toBe(true);
     expect(store.isSelected('HPE-PL-DL380-002')).toBe(false);
   });
+
+  it('should not add more than 4 items to compare', () => {
+    useCompareStore.getState().clear();
+    const store = useCompareStore.getState();
+    expect(store.selected.length).toBe(0);
+    store.toggle({
+      sku: 'DELL-A',
+      name: 'A',
+      vendor: 'V',
+      price: 1,
+      specs: { CPU: 'x' },
+    });
+    expect(useCompareStore.getState().selected.length).toBe(1);
+    store.toggle({
+      sku: 'DELL-B',
+      name: 'B',
+      vendor: 'V',
+      price: 1,
+      specs: { CPU: 'x' },
+    });
+    expect(useCompareStore.getState().selected.length).toBe(2);
+    store.toggle({
+      sku: 'DELL-C',
+      name: 'C',
+      vendor: 'V',
+      price: 1,
+      specs: { CPU: 'x' },
+    });
+    expect(useCompareStore.getState().selected.length).toBe(3);
+    store.toggle({
+      sku: 'DELL-D',
+      name: 'D',
+      vendor: 'V',
+      price: 1,
+      specs: { CPU: 'x' },
+    });
+
+    expect(useCompareStore.getState().selected.length).toBe(4);
+
+    // 5th item should be rejected
+    store.toggle({
+      sku: 'DELL-E',
+      name: 'E',
+      vendor: 'V',
+      price: 1,
+      specs: { CPU: 'x' },
+    });
+    expect(useCompareStore.getState().selected.length).toBe(4);
+    expect(useCompareStore.getState().isSelected('DELL-E')).toBe(false);
+  });
 });

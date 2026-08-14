@@ -137,4 +137,78 @@ describe('Cart Store', () => {
     expect(store.totalItems()).toBe(0);
     expect(store.totalPrice()).toBe(0);
   });
+
+  it('should default qty to 1 when not provided', () => {
+    const store = useCartStore.getState();
+    store.addItem({
+      sku: 'DELL-PE-R760-001',
+      name: 'Dell PowerEdge R760 2U Dual-Socket',
+      vendor: 'Dell',
+      price: 8499,
+      stockStatus: 'ok',
+    });
+
+    const state = useCartStore.getState();
+    expect(state.items[0].qty).toBe(1);
+  });
+
+  it('should use provided qty when specified', () => {
+    const store = useCartStore.getState();
+    store.addItem({
+      sku: 'DELL-PE-R760-001',
+      name: 'Dell PowerEdge R760 2U Dual-Socket',
+      vendor: 'Dell',
+      price: 8499,
+      stockStatus: 'ok',
+      qty: 5,
+    });
+
+    const state = useCartStore.getState();
+    expect(state.items[0].qty).toBe(5);
+  });
+
+  it('should accumulate qty when adding same SKU twice', () => {
+    const store = useCartStore.getState();
+    store.addItem({
+      sku: 'DELL-PE-R760-001',
+      name: 'Dell PowerEdge R760 2U Dual-Socket',
+      vendor: 'Dell',
+      price: 8499,
+      stockStatus: 'ok',
+      qty: 3,
+    });
+    store.addItem({
+      sku: 'DELL-PE-R760-001',
+      name: 'Dell PowerEdge R760 2U Dual-Socket',
+      vendor: 'Dell',
+      price: 8499,
+      stockStatus: 'ok',
+      qty: 2,
+    });
+
+    const state = useCartStore.getState();
+    expect(state.items[0].qty).toBe(5);
+  });
+
+  it('should handle updateQty for existing item', () => {
+    const store = useCartStore.getState();
+    store.addItem({
+      sku: 'DELL-PE-R760-001',
+      name: 'Dell PowerEdge R760 2U Dual-Socket',
+      vendor: 'Dell',
+      price: 8499,
+      stockStatus: 'ok',
+      qty: 1,
+    });
+    store.updateQty('DELL-PE-R760-001', 10);
+
+    const state = useCartStore.getState();
+    expect(state.items[0].qty).toBe(10);
+  });
+
+  it('should handle removeItem for non-existent SKU', () => {
+    const store = useCartStore.getState();
+    store.removeItem('NONEXISTENT');
+    expect(store.items.length).toBe(0);
+  });
 });
