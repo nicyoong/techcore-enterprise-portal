@@ -6,5 +6,3 @@ fix: resolve Vercel build error — tsconfig.json not found at project root
 - Update vercel.json to cd into techcore-enterprise-portal before
   running npm install and npm run build, with outputDirectory
   pointing to techcore-enterprise-portal/dist
-- Root tsconfig uses bundler moduleResolution compatible with
-  Tailwind v4 + Vite 8
