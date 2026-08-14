@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useUpsellStore, PRODUCTS } from '../../store';
-import { useCartStore } from '../../store';
+import { useUpsellStore } from '../../store/upsell';
+import { useCartStore } from '../../store/cart';
 import { useToast } from '../../components/ToastProvider';
-import type { Product } from '../../store';
+import type { Product } from '../../store/catalog';
+import { PRODUCTS } from '../../store/catalog';
 
 export default function UpsellPanel() {
   const { shownForSku, dismissUpsell, selectedAccessories, toggleAccessory, getActiveRule } = useUpsellStore();
@@ -44,6 +45,7 @@ export default function UpsellPanel() {
           vendor: 'TechCore Accessories',
           price: item.price,
           stockStatus: 'ok' as const,
+          availableStock: 999,
           qty: 1,
         });
       });

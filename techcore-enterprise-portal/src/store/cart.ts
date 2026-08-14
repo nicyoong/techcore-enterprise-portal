@@ -1,4 +1,18 @@
 import { create } from 'zustand';
+import { PRODUCTS } from './catalog';
+
+export interface Product {
+  sku: string;
+  name: string;
+  vendor: string;
+  category: string;
+  price: number;
+  stockStatus: 'ok' | 'low' | 'out';
+  totalStock: number;
+  allocatedStock: number;
+  specs: Record<string, string>;
+  description: string;
+}
 
 export interface CartItem {
   sku: string;
@@ -7,7 +21,13 @@ export interface CartItem {
   price: number;
   qty: number;
   stockStatus: 'ok' | 'low' | 'out';
+  availableStock: number;
 }
+
+export const getAvailable = (sku: string): number => {
+  const p = PRODUCTS.find((pr) => pr.sku === sku);
+  return p ? p.totalStock - p.allocatedStock : 0;
+};
 
 interface CartState {
   items: CartItem[];
@@ -37,7 +57,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     set((state) => ({ items: state.items.filter((i) => i.sku !== sku) })),
   updateQty: (sku, qty) =>
     set((state) => ({
-      items: state.items.map((i) => (i.sku === sku ? { ...i, qty } : i)),
+      items: state.items.map((i) => (i.sku === sku ? { ...i, qty: Math.max(1, qty) } : i)),
     })),
   clearCart: () => set({ items: [] }),
   totalItems: () => get().items.reduce((sum, i) => sum + i.qty, 0),

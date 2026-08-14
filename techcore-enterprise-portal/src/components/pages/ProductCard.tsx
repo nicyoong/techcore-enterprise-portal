@@ -19,15 +19,22 @@ export default function ProductCard({ product }: ProductCardProps) {
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
 
+  const availableStock = product.totalStock - product.allocatedStock;
   const stockTagVariant = product.stockStatus === 'ok' ? 'stock-ok' : product.stockStatus === 'low' ? 'stock-low' : 'stock-out';
 
   const handleAdd = () => {
     if (product.stockStatus === 'out') return;
-    addItem({ sku: product.sku, name: product.name, vendor: product.vendor, price: product.price, stockStatus: product.stockStatus });
+    addItem({
+      sku: product.sku,
+      name: product.name,
+      vendor: product.vendor,
+      price: product.price,
+      stockStatus: product.stockStatus,
+      availableStock,
+    });
     setAdded(true);
     addToast(`${product.name} added to RFQ cart`, 'success');
     setTimeout(() => setAdded(false), 1500);
-    // Trigger upsell for rack servers
     if (product.category === 'Servers & Compute') {
       showUpsell(product.sku);
     }
@@ -60,11 +67,19 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between mb-4">
-          <Tag variant={stockTagVariant}>
-            {product.stockStatus === 'ok' ? `In Stock (${product.stockQty})` : product.stockStatus === 'low' ? `Low Stock (${product.stockQty})` : 'Out of Stock'}
-          </Tag>
-          <p className="text-sm font-mono font-bold text-accent">${product.price.toLocaleString()}</p>
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-1">
+            <Tag variant={stockTagVariant}>
+              {product.stockStatus === 'ok' ? `${availableStock} Available` : product.stockStatus === 'low' ? `Low — ${availableStock} left` : 'Out of Stock'}
+            </Tag>
+            <p className="text-sm font-mono font-bold text-accent">${product.price.toLocaleString()}</p>
+          </div>
+          <p
+            className="text-xs font-mono text-text-muted"
+            title={`${product.totalStock} total · ${product.allocatedStock} allocated to other orders · ${availableStock} available for immediate dispatch`}
+          >
+            {product.totalStock} total · {product.allocatedStock} allocated
+          </p>
         </div>
         <div className="flex gap-2">
           <button onClick={handleAdd} disabled={product.stockStatus === 'out'}
