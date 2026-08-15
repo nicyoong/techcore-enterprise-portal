@@ -155,4 +155,44 @@ describe('ProductCard', () => {
     expect(screen.getByText('Intel Xeon Scalable')).toBeInTheDocument();
     expect(screen.getByText('16× DIMM slots')).toBeInTheDocument();
   });
+
+  it('calls addToast with correct message on add', () => {
+    const mockAddToast = vi.fn();
+    (useToast as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ addToast: mockAddToast });
+    render(<ProductCard product={mockProduct} />);
+    fireEvent.click(screen.getByText('Add to RFQ'));
+    expect(mockAddToast).toHaveBeenCalledWith('Dell PowerEdge R760 2U Dual-Socket added to RFQ cart', 'success');
+  });
+
+  it('shows "Unavailable" text when out of stock', () => {
+    const outProduct = { ...mockProduct, stockStatus: 'out' as const };
+    render(<ProductCard product={outProduct} />);
+    expect(screen.getByText('Unavailable')).toBeInTheDocument();
+  });
+
+  it('disables the Add to RFQ button when out of stock', () => {
+    const outProduct = { ...mockProduct, stockStatus: 'out' as const };
+    render(<ProductCard product={outProduct} />);
+    const btn = screen.getByText('Unavailable').closest('button');
+    expect(btn).toBeDisabled();
+  });
+
+  it('does not call showUpsell when adding out-of-stock product (early return)', () => {
+    const mockShowUpsell = vi.fn();
+    (useUpsellStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ showUpsell: mockShowUpsell });
+    const outProduct = { ...mockProduct, stockStatus: 'out' as const };
+    render(<ProductCard product={outProduct} />);
+    fireEvent.click(screen.getByText('Unavailable'));
+    expect(mockShowUpsell).not.toHaveBeenCalled();
+  });
+
+  it('renders Compare checkbox', () => {
+    render(<ProductCard product={mockProduct} />);
+    expect(screen.getByText('Compare')).toBeInTheDocument();
+  });
+
+  it('renders Details button', () => {
+    render(<ProductCard product={mockProduct} />);
+    expect(screen.getByText('Details')).toBeInTheDocument();
+  });
 });
