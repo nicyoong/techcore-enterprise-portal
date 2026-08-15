@@ -7,22 +7,10 @@ export interface Product {
   category: string;
   price: number;
   stockStatus: 'ok' | 'low' | 'out';
-  stockQty?: number;
+  totalStock: number;
+  allocatedStock: number;
   specs: Record<string, string>;
   description: string;
-}
-
-interface CatalogState {
-  products: Product[];
-  category: string;
-  vendor: string;
-  search: string;
-  sortBy: 'price-asc' | 'price-desc' | 'availability';
-  setCategory: (c: string) => void;
-  setVendor: (v: string) => void;
-  setSearch: (s: string) => void;
-  setSortBy: (s: 'price-asc' | 'price-desc' | 'availability') => void;
-  filtered: () => Product[];
 }
 
 export const PRODUCTS: Product[] = [
@@ -33,7 +21,8 @@ export const PRODUCTS: Product[] = [
     category: 'Servers & Compute',
     price: 8499,
     stockStatus: 'ok',
-    stockQty: 47,
+    totalStock: 47,
+    allocatedStock: 31,
     specs: {
       Processors: '2× Intel Xeon Scalable (up to 6th Gen)',
       Memory: '16× DIMM slots, up to 12TB DDR5',
@@ -42,7 +31,7 @@ export const PRODUCTS: Product[] = [
       GPU: 'Up to 4× PCIe 5.0 x16',
       FormFactor: '2U Rack',
     },
-    description: 'High-density 2U workhorse for virtualization, databases, and AI/ML inference. Supports up to 6th Gen Intel Xeon Scalable processors with 12TB DDR5.',
+    description: 'High-density 2U workhorse for virtualization, databases, and AI/ML inference.',
   },
   {
     sku: 'HPE-PL-DL380-002',
@@ -51,7 +40,8 @@ export const PRODUCTS: Product[] = [
     category: 'Servers & Compute',
     price: 7899,
     stockStatus: 'ok',
-    stockQty: 31,
+    totalStock: 31,
+    allocatedStock: 18,
     specs: {
       Processors: '2× Intel Xeon Scalable (Sapphire Rapids)',
       Memory: '16× DIMM slots, up to 8TB DDR5',
@@ -60,16 +50,17 @@ export const PRODUCTS: Product[] = [
       GPU: 'Up to 3× PCIe 5.0 add-in cards',
       FormFactor: '2U Rack',
     },
-    description: 'Industry-standard 2U server with HPE Intelligent Provisioning and iLO 7 management. Built for hybrid cloud and enterprise workloads.',
+    description: 'Industry-standard 2U server with HPE Intelligent Provisioning and iLO 7 management.',
   },
   {
     sku: 'LENOVO-PS-T1700-003',
     name: 'Lenovo ThinkStation T1700 Gen2 Workstation',
     vendor: 'Lenovo',
-    category: 'Endpoints',
+    category: 'Servers & Compute',
     price: 3299,
     stockStatus: 'ok',
-    stockQty: 120,
+    totalStock: 120,
+    allocatedStock: 45,
     specs: {
       CPU: 'Intel Core i7-14700 / i9-14900K',
       GPU: 'NVIDIA RTX 4070 12GB (optional)',
@@ -78,7 +69,7 @@ export const PRODUCTS: Product[] = [
       PSU: '700W 80+ Platinum',
       Warranty: '3-year depot with next-business-day',
     },
-    description: 'Professional workstation for CAD, BIM, and creative workloads. ISV-certified for Autodesk, Adobe, and Dassault Systèmes.',
+    description: 'Professional workstation for CAD, BIM, and creative workloads. ISV-certified.',
   },
   {
     sku: 'CISCO-C9300-004',
@@ -87,7 +78,8 @@ export const PRODUCTS: Product[] = [
     category: 'Networking',
     price: 4250,
     stockStatus: 'low',
-    stockQty: 8,
+    totalStock: 8,
+    allocatedStock: 5,
     specs: {
       Ports: '48× Gigabit Ethernet (RJ-45)',
       Uplinks: '6× 40G QSFP+ uplinks',
@@ -96,7 +88,7 @@ export const PRODUCTS: Product[] = [
       Security: 'MACsec, IP SLA, TrustSec',
       Stacking: 'Cisco StackPower or virtual stacking',
     },
-    description: 'Enterprise access-layer switch with Cisco IOS XE and digital trilateration security. Supports up to 740W PoE per chassis.',
+    description: 'Enterprise access-layer switch with Cisco IOS XE and digital trilateration security.',
   },
   {
     sku: 'ARISTA-7060-005',
@@ -105,7 +97,8 @@ export const PRODUCTS: Product[] = [
     category: 'Networking',
     price: 12900,
     stockStatus: 'ok',
-    stockQty: 14,
+    totalStock: 14,
+    allocatedStock: 6,
     specs: {
       Ports: '48× 10GbE/25GbE SFP28',
       Uplinks: '4× 100GbE QSFP28',
@@ -114,7 +107,7 @@ export const PRODUCTS: Product[] = [
       OS: 'EOS (Extensible Operating System)',
       Height: '1U fixed-configuration',
     },
-    description: 'High-performance data center switch with low-latency EOS and automation-ready CLI. Ideal for spine-leaf and leaf-tier deployments.',
+    description: 'High-performance data center switch with low-latency EOS and automation-ready CLI.',
   },
   {
     sku: 'PURE-FA-X90-006',
@@ -123,7 +116,8 @@ export const PRODUCTS: Product[] = [
     category: 'Storage',
     price: 89500,
     stockStatus: 'low',
-    stockQty: 3,
+    totalStock: 3,
+    allocatedStock: 2,
     specs: {
       Capacity: 'Up to 10.2 PB raw (8× 1.92TB or 3.84TB SSDs)',
       Performance: 'Up to 18M IOPS, 350GB/s throughput',
@@ -132,7 +126,7 @@ export const PRODUCTS: Product[] = [
       Connectivity: '16× 32Gb FC + 16× 100GbE',
       Support: 'Pure1 managed, 24/7 proactive support',
     },
-    description: 'All-flash NAS/SAN hybrid array with active-active HA, inline dedupe/compression, and Pure1 observability. 5-year warranty standard.',
+    description: 'All-flash NAS/SAN hybrid array with active-active HA and inline dedupe/compression.',
   },
   {
     sku: 'PALO-PA5280-007',
@@ -141,7 +135,8 @@ export const PRODUCTS: Product[] = [
     category: 'Security Appliances',
     price: 14750,
     stockStatus: 'ok',
-    stockQty: 22,
+    totalStock: 22,
+    allocatedStock: 9,
     specs: {
       ThreatPrevention: 'Up to 4.5 Gbps',
       FirewallThroughput: 'Up to 8.5 Gbps',
@@ -150,7 +145,7 @@ export const PRODUCTS: Product[] = [
       Slots: '4× expansion slots',
       Power: 'Dual hot-swappable redundant PSUs',
     },
-    description: 'Mid-range next-gen firewall with AI-driven threat intelligence, Prisma SD-WAN integration, and DNA analysis for automated incident response.',
+    description: 'Mid-range next-gen firewall with AI-driven threat intelligence and Prisma SD-WAN.',
   },
   {
     sku: 'FORTI-FG200F-008',
@@ -159,7 +154,8 @@ export const PRODUCTS: Product[] = [
     category: 'Security Appliances',
     price: 5600,
     stockStatus: 'ok',
-    stockQty: 38,
+    totalStock: 38,
+    allocatedStock: 12,
     specs: {
       ThreatProtection: 'Up to 1.76 Gbps',
       FirewallThroughput: 'Up to 3.5 Gbps',
@@ -168,7 +164,7 @@ export const PRODUCTS: Product[] = [
       Slots: '2× SFP+ 10Gb + 4× GE management',
       VPNConcurrent: 'Up to 2,000 IPsec peers',
     },
-    description: 'Cost-effective next-gen firewall with AI-accelerated threat detection, SD-WAN built-in, and single-pane-of-glass FortiManager integration.',
+    description: 'Cost-effective next-gen firewall with AI-accelerated threat detection and SD-WAN.',
   },
   {
     sku: 'CISCO-C9400-009',
@@ -177,7 +173,8 @@ export const PRODUCTS: Product[] = [
     category: 'Networking',
     price: 32500,
     stockStatus: 'ok',
-    stockQty: 6,
+    totalStock: 6,
+    allocatedStock: 4,
     specs: {
       FormFactor: '3RU modular chassis',
       Supervisor: 'C9400-SUP10-4T (1.6 Tbps per sup)',
@@ -186,7 +183,7 @@ export const PRODUCTS: Product[] = [
       Cooling: 'Dual redundant smart fans',
       StackMode: 'Cisco StackWise Virtual (up to 32 Tbps)',
     },
-    description: 'Modular core/distribution switch with sup flexibility and ScaleX silicon. Supports FabricPath, VXLAN, and Cisco Application Centric Infrastructure.',
+    description: 'Modular core/distribution switch with sup flexibility and ScaleX silicon.',
   },
   {
     sku: 'DELL-R660-010',
@@ -195,7 +192,8 @@ export const PRODUCTS: Product[] = [
     category: 'Servers & Compute',
     price: 4299,
     stockStatus: 'ok',
-    stockQty: 63,
+    totalStock: 63,
+    allocatedStock: 28,
     specs: {
       CPU: '1× Intel Xeon Scalable (up to 6th Gen)',
       Memory: '16× DIMM slots, up to 8TB DDR5',
@@ -204,7 +202,7 @@ export const PRODUCTS: Product[] = [
       GPU: 'Up to 1× full-height dual-slot PCIe 5.0',
       Management: 'iDRAC9 with Lifecycle Controller',
     },
-    description: 'Compact 1U compute node for edge, VDI, and lightweight virtualization. iDRAC9 Enterprise with remote console and PowerShell support.',
+    description: 'Compact 1U compute node for edge, VDI, and lightweight virtualization.',
   },
   {
     sku: 'LENOVO-X1C11-011',
@@ -213,7 +211,8 @@ export const PRODUCTS: Product[] = [
     category: 'Endpoints',
     price: 1849,
     stockStatus: 'ok',
-    stockQty: 200,
+    totalStock: 200,
+    allocatedStock: 60,
     specs: {
       CPU: 'Intel Core Ultra 7 155H (16 cores)',
       Display: '14" WUXGA (1920×1200) IPS, 400 nits',
@@ -222,7 +221,7 @@ export const PRODUCTS: Product[] = [
       Battery: '88Wh, up to 18hr runtime',
       Weight: '1.12 kg / 2.47 lbs',
     },
-    description: 'Ultra-lightweight business ultrabook with AI NPU, Thunderbolt 4, and military-grade durability (MIL-STD-810H). Windows Hello IR camera standard.',
+    description: 'Ultra-lightweight business ultrabook with AI NPU and MIL-STD-810H durability.',
   },
   {
     sku: 'UBNT-UDM-PRO-012',
@@ -231,7 +230,8 @@ export const PRODUCTS: Product[] = [
     category: 'Networking',
     price: 549,
     stockStatus: 'ok',
-    stockQty: 55,
+    totalStock: 55,
+    allocatedStock: 20,
     specs: {
       Gateway: '10 GbE WAN + 5 GbE LAN + 2.5 GbE WAN/LAN',
       Switching: '8× 1GbE + 1× 10GbE SFP+',
@@ -240,7 +240,7 @@ export const PRODUCTS: Product[] = [
       NVR: '2× 3.5" SATA, up to 16TB storage',
       CameraSlots: 'Supports up to 32 UniFi cameras',
     },
-    description: 'All-in-one networking appliance combining UniFi gateway, switch, WiFi controller, and NVR. Ideal for SMBs and branch offices.',
+    description: 'All-in-one networking appliance for SMBs and branch offices.',
   },
 ];
 
@@ -259,8 +259,20 @@ export const VENDORS = [
   'Juniper', 'Netapp', 'Nutanix',
 ] as const;
 
+interface CatalogState {
+  category: string;
+  vendor: string;
+  search: string;
+  sortBy: 'price-asc' | 'price-desc' | 'availability';
+  setCategory: (c: string) => void;
+  setVendor: (v: string) => void;
+  setSearch: (s: string) => void;
+  setSortBy: (s: 'price-asc' | 'price-desc' | 'availability') => void;
+  filtered: () => Product[];
+  getAvailable: (sku: string) => number;
+}
+
 export const useCatalogStore = create<CatalogState>((set, get) => ({
-  products: PRODUCTS,
   category: '',
   vendor: '',
   search: '',
@@ -270,26 +282,30 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   setSearch: (s) => set({ search: s }),
   setSortBy: (s) => set({ sortBy: s }),
   filtered: () => {
-    const { products, category, vendor, search, sortBy } = get();
-    let result = products;
-    if (category) result = result.filter((p) => p.category === category);
-    if (vendor) result = result.filter((p) => p.vendor === vendor);
-    if (search) {
-      const q = search.toLowerCase();
+    let result: Product[] = PRODUCTS;
+    if (get().category) result = result.filter((p: Product) => p.category === get().category);
+    if (get().vendor) result = result.filter((p: Product) => p.vendor === get().vendor);
+    if (get().search) {
+      const q = get().search.toLowerCase();
       result = result.filter(
-        (p) =>
+        (p: Product) =>
           p.name.toLowerCase().includes(q) ||
           p.sku.toLowerCase().includes(q) ||
           p.vendor.toLowerCase().includes(q) ||
           p.description.toLowerCase().includes(q)
       );
     }
-    result = [...result].sort((a, b) => {
-      if (sortBy === 'price-asc') return a.price - b.price;
-      if (sortBy === 'price-desc') return b.price - a.price;
-      const order = { ok: 0, low: 1, out: 2 };
-      return order[a.stockStatus] - order[b.stockStatus];
+    result = [...result].sort((a: Product, b: Product) => {
+      if (get().sortBy === 'price-asc') return a.price - b.price;
+      if (get().sortBy === 'price-desc') return b.price - a.price;
+      const aAvail = a.totalStock - a.allocatedStock;
+      const bAvail = b.totalStock - b.allocatedStock;
+      return aAvail - bAvail;
     });
     return result;
+  },
+  getAvailable: (sku) => {
+    const p = PRODUCTS.find((pr: Product) => pr.sku === sku);
+    return p ? p.totalStock - p.allocatedStock : 0;
   },
 }));

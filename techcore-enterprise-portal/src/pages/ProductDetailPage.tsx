@@ -1,10 +1,10 @@
 import { useParams, Link } from 'react-router-dom';
-import { PRODUCTS } from '../store';
-import { useCartStore } from '../store';
-import { useCompareStore } from '../store';
+import { PRODUCTS } from '../store/catalog';
+import { useCartStore } from '../store/cart';
+import { useCompareStore } from '../store/compare';
 import { useToast } from '../components/ToastProvider';
 import { Tag } from '../components/ui/Tag';
-import type { Product } from '../store';
+import type { Product } from '../store/catalog';
 
 export default function ProductDetailPage() {
   const { sku } = useParams<{ sku: string }>();
@@ -28,6 +28,7 @@ export default function ProductDetailPage() {
     );
   }
 
+  const availableStock = product.totalStock - product.allocatedStock;
   const stockTagVariant = product.stockStatus === 'ok' ? 'stock-ok' : product.stockStatus === 'low' ? 'stock-low' : 'stock-out';
 
   const tieredPricing = [
@@ -37,15 +38,22 @@ export default function ProductDetailPage() {
   ];
 
   const warehouses = [
-    { name: 'Dallas, TX (DED)', qty: Math.floor(product.stockQty! * 0.5) },
-    { name: 'Chicago, IL (CH1)', qty: Math.floor(product.stockQty! * 0.3) },
-    { name: 'Newark, NJ (NRK)', qty: product.stockQty! - Math.floor(product.stockQty! * 0.5) - Math.floor(product.stockQty! * 0.3) },
+    { name: 'Dallas, TX (DED)', qty: Math.floor(product.totalStock * 0.5) },
+    { name: 'Chicago, IL (CH1)', qty: Math.floor(product.totalStock * 0.3) },
+    { name: 'Newark, NJ (NRK)', qty: product.totalStock - Math.floor(product.totalStock * 0.5) - Math.floor(product.totalStock * 0.3) },
   ];
 
   const relatedProducts = PRODUCTS.filter((p: Product) => p.category === product.category && p.sku !== product.sku).slice(0, 3);
 
   const handleAdd = () => {
-    addItem({ sku: product.sku, name: product.name, vendor: product.vendor, price: product.price, stockStatus: product.stockStatus });
+    addItem({
+      sku: product.sku,
+      name: product.name,
+      vendor: product.vendor,
+      price: product.price,
+      stockStatus: product.stockStatus,
+      availableStock,
+    });
     addToast(`${product.name} added to RFQ cart`, 'success');
   };
 
@@ -79,16 +87,19 @@ export default function ProductDetailPage() {
           <div className="flex items-center gap-3 mb-3">
             <Tag variant="vendor">{product.vendor}</Tag>
             <Tag variant={stockTagVariant}>
-              {product.stockStatus === 'ok' ? `In Stock (${product.stockQty} units)` : product.stockStatus === 'low' ? `Low Stock (${product.stockQty} units)` : 'Out of Stock'}
+              {product.stockStatus === 'ok' ? `${availableStock} Available` : product.stockStatus === 'low' ? `Low — ${availableStock} left` : 'Out of Stock'}
             </Tag>
           </div>
           <h1 className="text-3xl font-bold text-text-primary mb-2 leading-tight">{product.name}</h1>
           <p className="text-sm font-mono text-text-muted mb-4">{product.sku}</p>
           <p className="text-sm text-text-secondary leading-relaxed mb-6">{product.description}</p>
-          <div className="flex items-baseline gap-3 mb-6">
+          <div className="flex items-baseline gap-3 mb-2">
             <span className="text-3xl font-mono font-bold text-accent">${product.price.toLocaleString()}</span>
             <span className="text-xs text-text-muted">USD · Net-30 available</span>
           </div>
+          <p className="text-xs font-mono text-text-muted mb-6" title={`${product.totalStock} total units · ${product.allocatedStock} allocated to other orders · ${availableStock} available for immediate dispatch`}>
+            {product.totalStock} total stock · {product.allocatedStock} allocated · {availableStock} available
+          </p>
 
           <div className="flex gap-3 mb-8">
             <button onClick={handleAdd} disabled={product.stockStatus === 'out'}
@@ -133,14 +144,23 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="rounded-xl border border-border bg-surface p-5 mb-6">
-            <h2 className="text-sm font-semibold text-text-primary mb-4">Stock by Warehouse</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-text-primary">Stock by Warehouse</h2>
+              <p className="text-xs font-mono text-text-muted" title={`${product.allocatedStock} units allocated to other orders`}>
+                {product.allocatedStock} allocated
+              </p>
+            </div>
             <div className="space-y-2">
               {warehouses.map((wh) => (
                 <div key={wh.name} className="flex items-center justify-between text-xs">
                   <span className="font-mono text-text-secondary">{wh.name}</span>
-                  <span className={`font-mono ${wh.qty > 10 ? 'text-success' : wh.qty > 0 ? 'text-warning' : 'text-danger'}`}>{wh.qty} units</span>
+                  <span className="font-mono text-text-primary">{wh.qty} units</span>
                 </div>
               ))}
+              <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
+                <span className="font-mono text-text-muted">Available for dispatch</span>
+                <span className="font-mono text-accent font-bold">{availableStock} units</span>
+              </div>
             </div>
           </div>
 
